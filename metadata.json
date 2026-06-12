@@ -1,0 +1,5 @@
+{
+  "name": "PotchX",
+  "description": "A digital identification tool for travelers with AI-powered translation and security document generation.",
+  "requestFramePermissions": ["camera"]
+}

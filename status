@@ -1,0 +1,258 @@
+warning: in the working copy of 'src/App.tsx', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/src/App.tsx b/src/App.tsx[m
+[1mindex 16e7ea6..1f65d77 100644[m
+[1m--- a/src/App.tsx[m
+[1m+++ b/src/App.tsx[m
+[36m@@ -95,20 +95,20 @@[m [mexport default function App() {[m
+       return;[m
+     }[m
+ [m
+[31m-    const isCallback = window.location.hash.includes('access_token') || [m
+[31m-                       window.location.search.includes('code=') ||[m
+[31m-                       window.location.hash.includes('type=recovery');[m
+[32m+[m[32m    const isCallback = window.location.hash.includes('access_token') ||[m
+[32m+[m[32m      window.location.search.includes('code=') ||[m
+[32m+[m[32m      window.location.hash.includes('type=recovery');[m
+ [m
+     supabase.auth.getSession().then(({ data: { session } }) => {[m
+       console.log('Initial session fetch:', session ? 'Session found' : 'No session');[m
+       setSession(session);[m
+[31m-      [m
+[32m+[m
+       // Se não for um callback de login, libera o loading imediatamente.[m
+       // Se for um callback, aguarda o evento SIGNED_IN do onAuthStateChange.[m
+       if (!isCallback || session) {[m
+         setAuthLoading(false);[m
+       }[m
+[31m-      [m
+[32m+[m
+       if (session) {[m
+         fetchLastTravelForm(session.user.id);[m
+       }[m
+[36m@@ -117,10 +117,14 @@[m [mexport default function App() {[m
+     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {[m
+       console.log('Auth state changed:', event, session ? 'Session found' : 'No session');[m
+       setSession(session);[m
+[31m-      [m
+[32m+[m
+       if (session) {[m
+         fetchLastTravelForm(session.user.id);[m
+[31m-        setAuthLoading(false); // Libera o loading quando a sessão chega via callback[m
+[32m+[m[32m        setAuthLoading(false);[m
+[32m+[m
+[32m+[m[32m        // The user confirmed they do NOT want the camera/form to open automatically[m
+[32m+[m[32m        // after email login. They want the standard confirmation/login flow.[m
+[32m+[m
+       } else if (!isCallback) {[m
+         setAuthLoading(false);[m
+       }[m
+[36m@@ -224,7 +228,7 @@[m [mexport default function App() {[m
+           const { error: signUpError } = await supabase.auth.signUp({[m
+             email: finalEmail,[m
+             password: password,[m
+[31m-            options: { [m
+[32m+[m[32m            options: {[m
+               emailRedirectTo: window.location.origin + (window.location.pathname.startsWith('/app') ? '/app/' : '/')[m
+             },[m
+           });[m
+[36m@@ -288,7 +292,7 @@[m [mexport default function App() {[m
+       const imgWidth = 125;[m
+       const imgHeight = 176;[m
+       pdf.addImage(dataUrl, 'PNG', (210 - imgWidth) / 2, (297 - imgHeight) / 2, imgWidth, imgHeight, undefined, 'FAST');[m
+[31m-      [m
+[32m+[m
+       const fileName = `PotchX-${formData.fullName.replace(/\s+/g, '-').toLowerCase() || 'viagem'}.pdf`;[m
+       const pdfBlob = pdf.output('blob');[m
+ [m
+[36m@@ -352,7 +356,7 @@[m [mexport default function App() {[m
+   useEffect(() => {[m
+     if (session) return;[m
+     const userLang = navigator.language.split('-')[0];[m
+[31m-    const trans: any = { [m
+[32m+[m[32m    const trans: any = {[m
+       pt: { 'title-welcome': 'Bem-vindo ao PotchX', 'subtitle': 'Entre com seu e-mail para continuar', 'label-email': 'E-mail', 'input-email': 'seu@email.com', 'label-pass': 'Senha', 'input-pass': 'Maiúscula, minúscula, número', 'btn-action': 'Entrar ou Cadastrar' },[m
+       es: { 'title-welcome': 'Bienvenido a PotchX', 'subtitle': 'Ingrese su correo para continuar', 'label-email': 'Correo electrónico', 'input-email': 'su@email.com', 'label-pass': 'Contraseña', 'input-pass': 'Mayúscula, minúscula, número', 'btn-action': 'Entrar o Registrarse' }[m
+     };[m
+[36m@@ -392,7 +396,7 @@[m [mexport default function App() {[m
+ [m
+   if (!session) {[m
+     return ([m
+[31m-      <LoginPotchX [m
+[32m+[m[32m      <LoginPotchX[m
+         email={email} setEmail={setEmail}[m
+         password={password} setPassword={setPassword}[m
+         showPassword={showPassword} setShowPassword={setShowPassword}[m
+[36m@@ -408,7 +412,7 @@[m [mexport default function App() {[m
+     <PotchXApp bgLoaded={bgLoaded} handleLogout={handleLogout}>[m
+       <AnimatePresence mode="wait">[m
+         {!showForm ? ([m
+[31m-          <PresentationSection [m
+[32m+[m[32m          <PresentationSection[m
+             key="presentation"[m
+             country={country} setCountry={setCountry}[m
+             identifiedLanguage={identifiedLanguage}[m
+[36m@@ -416,7 +420,7 @@[m [mexport default function App() {[m
+             labels={currentLabels}[m
+           />[m
+         ) : showPreview ? ([m
+[31m-          <DocumentPreview [m
+[32m+[m[32m          <DocumentPreview[m
+             key="preview"[m
+             formData={formData}[m
+             translatedData={translatedData}[m
+[36m@@ -429,11 +433,11 @@[m [mexport default function App() {[m
+             getCountryColors={getCountryColors}[m
+           />[m
+         ) : ([m
+[31m-          <DocumentForm [m
+[32m+[m[32m          <DocumentForm[m
+             key="form"[m
+             formData={formData}[m
+             handleInputChange={handleInputChange}[m
+[31m-            handleSubmit={() => {}} // No longer used as main submit[m
+[32m+[m[32m            handleSubmit={() => { }} // No longer used as main submit[m
+             handleBack={handleBack}[m
+             handleViewDoc={handleViewDoc}[m
+             setShowCamera={setShowCamera}[m
+[36m@@ -446,15 +450,14 @@[m [mexport default function App() {[m
+ [m
+       <AnimatePresence>[m
+         {showSuccess && ([m
+[31m-          <SuccessModal [m
+[32m+[m[32m          <SuccessModal[m
+             labels={currentLabels}[m
+             handleDownload={handleDownload}[m
+             handleBack={() => setShowSuccess(false)}[m
+           />[m
+         )}[m
+       </AnimatePresence>[m
+[31m-[m
+[31m-      <CameraModal [m
+[32m+[m[32m      <CameraModal[m
+         isOpen={showCamera}[m
+         onClose={() => setShowCamera(false)}[m
+         onCapture={(img) => { setPassportImage(img); setShowCamera(false); }}[m
+[1mdiff --git a/src/components/CameraModal.tsx b/src/components/CameraModal.tsx[m
+[1mindex 8bc1752..3e6ae58 100644[m
+[1m--- a/src/components/CameraModal.tsx[m
+[1m+++ b/src/components/CameraModal.tsx[m
+[36m@@ -66,12 +66,12 @@[m [mexport default function CameraModal({ onCapture, onClose }: CameraModalProps) {[m
+         // Calculate source dimensions based on zoom and video aspect ratio[m
+         const videoWidth = video.videoWidth;[m
+         const videoHeight = video.videoHeight;[m
+[31m-        [m
+[32m+[m
+         const targetAspect = 10 / 8.22;[m
+         const videoAspect = videoWidth / videoHeight;[m
+[31m-        [m
+[32m+[m
+         let sourceWidth, sourceHeight;[m
+[31m-        [m
+[32m+[m
+         // Crop the video to match the target aspect ratio while respecting zoom[m
+         if (videoAspect > targetAspect) {[m
+           // Video is wider than target[m
+[36m@@ -90,9 +90,9 @@[m [mexport default function CameraModal({ onCapture, onClose }: CameraModalProps) {[m
+         context.imageSmoothingEnabled = true;[m
+         context.imageSmoothingQuality = 'high';[m
+         context.filter = 'contrast(1.15) brightness(1.02) saturate(1.05)';[m
+[31m-        [m
+[32m+[m
+         context.drawImage(video, x, y, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);[m
+[31m-        [m
+[32m+[m
+         // Export as maximum quality JPG (100% quality)[m
+         const dataUrl = canvas.toDataURL('image/jpeg', 1.0);[m
+         onCapture(dataUrl);[m
+[36m@@ -117,12 +117,12 @@[m [mexport default function CameraModal({ onCapture, onClose }: CameraModalProps) {[m
+         e.touches[0].pageY - e.touches[1].pageY[m
+       );[m
+       const delta = distance - lastTouchDistance.current;[m
+[31m-      [m
+[32m+[m
+       setZoom(prev => {[m
+         const newZoom = Math.min(Math.max(prev + delta * 0.01, 1), 3);[m
+         return newZoom;[m
+       });[m
+[31m-      [m
+[32m+[m
+       lastTouchDistance.current = distance;[m
+     }[m
+   };[m
+[36m@@ -132,14 +132,14 @@[m [mexport default function CameraModal({ onCapture, onClose }: CameraModalProps) {[m
+   };[m
+ [m
+   return ([m
+[31m-    <motion.div [m
+[32m+[m[32m    <motion.div[m
+       initial={{ opacity: 0 }}[m
+       animate={{ opacity: 1 }}[m
+       exit={{ opacity: 0 }}[m
+       className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-4"[m
+     >[m
+       <div className="absolute top-6 right-6 z-10">[m
+[31m-        <button [m
+[32m+[m[32m        <button[m
+           onClick={onClose}[m
+           className="p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all"[m
+         >[m
+[36m@@ -147,7 +147,7 @@[m [mexport default function CameraModal({ onCapture, onClose }: CameraModalProps) {[m
+         </button>[m
+       </div>[m
+ [m
+[31m-      <div [m
+[32m+[m[32m      <div[m
+         className="relative w-full max-w-4xl bg-zinc-900 rounded-3xl overflow-hidden shadow-2xl border border-white/10"[m
+         style={{ aspectRatio: '10/8.22' }}[m
+         onTouchStart={handleTouchStart}[m
+[36m@@ -159,7 +159,7 @@[m [mexport default function CameraModal({ onCapture, onClose }: CameraModalProps) {[m
+             <p>{error}</p>[m
+           </div>[m
+         ) : ([m
+[31m-          <video [m
+[32m+[m[32m          <video[m
+             ref={videoRef}[m
+             autoPlay[m
+             playsInline[m
+[36m@@ -167,7 +167,7 @@[m [mexport default function CameraModal({ onCapture, onClose }: CameraModalProps) {[m
+             style={{ transform: `scale(${zoom})` }}[m
+           />[m
+         )}[m
+[31m-        [m
+[32m+[m
+         {/* Zoom Indicator */}[m
+         <div className="absolute bottom-6 left-6 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-bold">[m
+           {zoom.toFixed(1)}x[m
+[36m@@ -175,14 +175,14 @@[m [mexport default function CameraModal({ onCapture, onClose }: CameraModalProps) {[m
+       </div>[m
+ [m
+       <div className="mt-8 flex items-center gap-8">[m
+[31m-        <button [m
+[32m+[m[32m        <button[m
+           onClick={() => setIsFrontCamera(!isFrontCamera)}[m
+           className="p-4 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all"[m
+         >[m
+           <RefreshCw size={24} />[m
+         </button>[m
+ [m
+[31m-        <button [m
+[32m+[m[32m        <button[m
+           onClick={handleCapture}[m
+           className="w-20 h-20 rounded-full border-4 border-white p-1 hover:scale-105 transition-all active:scale-95"[m
+         >[m
+[36m@@ -190,13 +190,13 @@[m [mexport default function CameraModal({ onCapture, onClose }: CameraModalProps) {[m
+         </button>[m
+ [m
+         <div className="flex flex-col gap-2">[m
+[31m-          <button [m
+[32m+[m[32m          <button[m
+             onClick={() => setZoom(prev => Math.min(prev + 0.2, 3))}[m
+             className="p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all"[m
+           >[m
+             <ZoomIn size={20} />[m
+           </button>[m
+[31m-          <button [m
+[32m+[m[32m          <button[m
+             onClick={() => setZoom(prev => Math.max(prev - 0.2, 1))}[m
+             className="p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all"[m
+           >[m
