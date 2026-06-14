@@ -1100,6 +1100,62 @@ export default function App() {
                         display: "flex",
                       }}
                     >
+                      {(() => {
+                        const colors = getCountryColors(formData.destinationCountry);
+                        const borderThickness = "12px";
+                        return (
+                          <>
+                            <div
+                              className="absolute top-0 left-0 right-0 flex z-20"
+                              style={{ height: borderThickness }}
+                            >
+                              {colors.map((c, i) => (
+                                <div
+                                  key={i}
+                                  className="flex-1"
+                                  style={{ backgroundColor: c, height: borderThickness }}
+                                />
+                              ))}
+                            </div>
+                            <div
+                              className="absolute bottom-0 left-0 right-0 flex z-20"
+                              style={{ height: borderThickness }}
+                            >
+                              {colors.map((c, i) => (
+                                <div
+                                  key={i}
+                                  className="flex-1"
+                                  style={{ backgroundColor: c, height: borderThickness }}
+                                />
+                              ))}
+                            </div>
+                            <div
+                              className="absolute top-0 bottom-0 left-0 flex flex-col z-20"
+                              style={{ width: borderThickness }}
+                            >
+                              {colors.map((c, i) => (
+                                <div
+                                  key={i}
+                                  className="flex-1"
+                                  style={{ backgroundColor: c, width: borderThickness }}
+                                />
+                              ))}
+                            </div>
+                            <div
+                              className="absolute top-0 bottom-0 right-0 flex flex-col z-20"
+                              style={{ width: borderThickness }}
+                            >
+                              {colors.map((c, i) => (
+                                <div
+                                  key={i}
+                                  className="flex-1"
+                                  style={{ backgroundColor: c, width: borderThickness }}
+                                />
+                              ))}
+                            </div>
+                          </>
+                        );
+                      })()}
                       <div
                         style={{
                           transform: "rotate(-90deg)",
@@ -1460,6 +1516,62 @@ export default function App() {
                           display: "flex",
                         }}
                       >
+                        {(() => {
+                          const colors = getCountryColors(formData.destinationCountry);
+                          const borderThickness = "12px";
+                          return (
+                            <>
+                              <div
+                                className="absolute top-0 left-0 right-0 flex z-20"
+                                style={{ height: borderThickness }}
+                              >
+                                {colors.map((c, i) => (
+                                  <div
+                                    key={i}
+                                    className="flex-1"
+                                    style={{ backgroundColor: c, height: borderThickness }}
+                                  />
+                                ))}
+                              </div>
+                              <div
+                                className="absolute bottom-0 left-0 right-0 flex z-20"
+                                style={{ height: borderThickness }}
+                              >
+                                {colors.map((c, i) => (
+                                  <div
+                                    key={i}
+                                    className="flex-1"
+                                    style={{ backgroundColor: c, height: borderThickness }}
+                                  />
+                                ))}
+                              </div>
+                              <div
+                                className="absolute top-0 bottom-0 left-0 flex flex-col z-20"
+                                style={{ width: borderThickness }}
+                              >
+                                {colors.map((c, i) => (
+                                  <div
+                                    key={i}
+                                    className="flex-1"
+                                    style={{ backgroundColor: c, width: borderThickness }}
+                                  />
+                                ))}
+                              </div>
+                              <div
+                                className="absolute top-0 bottom-0 right-0 flex flex-col z-20"
+                                style={{ width: borderThickness }}
+                              >
+                                {colors.map((c, i) => (
+                                  <div
+                                    key={i}
+                                    className="flex-1"
+                                    style={{ backgroundColor: c, width: borderThickness }}
+                                  />
+                                ))}
+                              </div>
+                            </>
+                          );
+                        })()}
                         <div
                           style={{
                             transform: "rotate(-90deg)",
