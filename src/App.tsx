@@ -472,7 +472,6 @@ export default function App() {
                   <button
                     onClick={() => {
                       setShowSuccess(false);
-                      handleDownload();
                     }}
                     className="w-full py-4 px-8 rounded-2xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200"
                   >

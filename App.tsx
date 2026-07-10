@@ -381,13 +381,19 @@ export default function App() {
         cacheBust: true,
         pixelRatio: 2,
         backgroundColor: "#ffffff",
+        skipFonts: true,
+        width: 472,
+        height: 665,
       });
 
-      // Captura o VERSO (estático na área invisível)
+      // Captura o VERSO (estática na área invisível)
       const backImage = await toPng(backRef.current, {
         cacheBust: true,
         pixelRatio: 2,
         backgroundColor: "#ffffff",
+        skipFonts: true,
+        width: 472,
+        height: 665,
       });
 
       const pdf = new jsPDF({
@@ -469,10 +475,11 @@ export default function App() {
                     )}
                 </p>
                 <div className="space-y-3">
+                  {/* Botão "Baixar PDF Novamente" → AGORA VOLTA PARA A PRÉ-VISUALIZAÇÃO */}
                   <button
                     onClick={() => {
                       setShowSuccess(false);
-                      handleDownload();
+                      setShowPreview(true);
                     }}
                     className="w-full py-4 px-8 rounded-2xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200"
                   >
@@ -777,15 +784,15 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* ========================================================== */}
                 {/* ÁREA INVISÍVEL PARA CAPTURA DO PDF */}
-                {/* ========================================================== */}
                 <div
                   style={{
-                    position: "absolute",
-                    top: "-9999px",
-                    left: "-9999px",
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    opacity: 0,
                     pointerEvents: "none",
+                    zIndex: -1,
                   }}
                 >
                   {/* FRENTE ESTÁTICA PARA O PDF */}
@@ -1091,9 +1098,8 @@ export default function App() {
                     <div
                       className="bg-white shadow-2xl overflow-hidden relative flex flex-col border border-zinc-300"
                       style={{
-                        width: "100%",
-                        maxWidth: "472px",
-                        minHeight: "665px",
+                        width: "472px",
+                        height: "665px",
                         backgroundColor: "white",
                         alignItems: "center",
                         justifyContent: "center",
@@ -1101,7 +1107,9 @@ export default function App() {
                       }}
                     >
                       {(() => {
-                        const colors = getCountryColors(formData.destinationCountry);
+                        const colors = getCountryColors(
+                          formData.destinationCountry,
+                        );
                         const borderThickness = "12px";
                         return (
                           <>
@@ -1113,7 +1121,10 @@ export default function App() {
                                 <div
                                   key={i}
                                   className="flex-1"
-                                  style={{ backgroundColor: c, height: borderThickness }}
+                                  style={{
+                                    backgroundColor: c,
+                                    height: borderThickness,
+                                  }}
                                 />
                               ))}
                             </div>
@@ -1125,7 +1136,10 @@ export default function App() {
                                 <div
                                   key={i}
                                   className="flex-1"
-                                  style={{ backgroundColor: c, height: borderThickness }}
+                                  style={{
+                                    backgroundColor: c,
+                                    height: borderThickness,
+                                  }}
                                 />
                               ))}
                             </div>
@@ -1137,7 +1151,10 @@ export default function App() {
                                 <div
                                   key={i}
                                   className="flex-1"
-                                  style={{ backgroundColor: c, width: borderThickness }}
+                                  style={{
+                                    backgroundColor: c,
+                                    width: borderThickness,
+                                  }}
                                 />
                               ))}
                             </div>
@@ -1149,7 +1166,10 @@ export default function App() {
                                 <div
                                   key={i}
                                   className="flex-1"
-                                  style={{ backgroundColor: c, width: borderThickness }}
+                                  style={{
+                                    backgroundColor: c,
+                                    width: borderThickness,
+                                  }}
                                 />
                               ))}
                             </div>
@@ -1507,9 +1527,8 @@ export default function App() {
                       <div
                         className="bg-white shadow-2xl overflow-hidden relative flex flex-col border border-zinc-300"
                         style={{
-                          width: "100%",
-                          maxWidth: "472px",
-                          minHeight: "665px",
+                          width: "472px",
+                          height: "665px",
                           backgroundColor: "white",
                           alignItems: "center",
                           justifyContent: "center",
@@ -1517,7 +1536,9 @@ export default function App() {
                         }}
                       >
                         {(() => {
-                          const colors = getCountryColors(formData.destinationCountry);
+                          const colors = getCountryColors(
+                            formData.destinationCountry,
+                          );
                           const borderThickness = "12px";
                           return (
                             <>
@@ -1529,7 +1550,10 @@ export default function App() {
                                   <div
                                     key={i}
                                     className="flex-1"
-                                    style={{ backgroundColor: c, height: borderThickness }}
+                                    style={{
+                                      backgroundColor: c,
+                                      height: borderThickness,
+                                    }}
                                   />
                                 ))}
                               </div>
@@ -1541,7 +1565,10 @@ export default function App() {
                                   <div
                                     key={i}
                                     className="flex-1"
-                                    style={{ backgroundColor: c, height: borderThickness }}
+                                    style={{
+                                      backgroundColor: c,
+                                      height: borderThickness,
+                                    }}
                                   />
                                 ))}
                               </div>
@@ -1553,7 +1580,10 @@ export default function App() {
                                   <div
                                     key={i}
                                     className="flex-1"
-                                    style={{ backgroundColor: c, width: borderThickness }}
+                                    style={{
+                                      backgroundColor: c,
+                                      width: borderThickness,
+                                    }}
                                   />
                                 ))}
                               </div>
@@ -1565,7 +1595,10 @@ export default function App() {
                                   <div
                                     key={i}
                                     className="flex-1"
-                                    style={{ backgroundColor: c, width: borderThickness }}
+                                    style={{
+                                      backgroundColor: c,
+                                      width: borderThickness,
+                                    }}
                                   />
                                 ))}
                               </div>
