@@ -30,6 +30,7 @@ import {
   TranslatedForm,
 } from "./constants/translations";
 import { translateFormData } from "./services/geminiService";
+import { saveEmergencyCard } from "./services/emergencyCardService";
 
 interface FormData {
   fullName: string;
@@ -410,6 +411,26 @@ export default function App() {
 
       const fileName = `PotchX-${formData.fullName.replace(/\s+/g, "-").toLowerCase() || "documento"}.pdf`;
       pdf.save(fileName);
+
+      // Salva os dados do cartão no Supabase em segundo plano
+      saveEmergencyCard({
+        full_name: formData.fullName,
+        blood_type: formData.bloodType,
+        rh_factor: formData.rhFactor,
+        nationality: formData.nationality,
+        medications: formData.medications,
+        allergies: formData.allergies,
+        disease_type: formData.diseaseType,
+        hotel_address: formData.hotelAddress,
+        hotel_phone: formData.hotelPhone,
+        destination_country: formData.destinationCountry,
+        emergency_name: formData.emergencyName,
+        emergency_phone: formData.emergencyPhone,
+        passport_image_url: passportImage ?? undefined,
+        destination_language: destIdentifiedLanguage ?? undefined,
+      }).catch((err) =>
+        console.error("Erro ao salvar no Supabase:", err)
+      );
 
       setShowSuccess(true);
     } catch (err) {
