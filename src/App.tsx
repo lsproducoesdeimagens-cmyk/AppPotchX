@@ -31,6 +31,7 @@ import {
 } from "./constants/translations";
 import { translateFormData } from "./services/geminiService";
 import { saveEmergencyCard } from "./services/emergencyCardService";
+import { supabase } from "./services/supabaseClient";
 
 interface FormData {
   fullName: string;
@@ -500,7 +501,7 @@ export default function App() {
                       "Baixar PDF Novamente"}
                   </button>
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       setShowSuccess(false);
                       setShowPreview(false);
                       setShowForm(false);
@@ -523,6 +524,7 @@ export default function App() {
                         emergencyName: "",
                         emergencyPhone: "",
                       });
+                      await supabase.auth.signOut();
                     }}
                     className="w-full py-3 px-8 rounded-2xl bg-zinc-100 text-zinc-600 font-bold hover:bg-zinc-200 transition-all"
                   >
