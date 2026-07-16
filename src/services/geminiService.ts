@@ -271,18 +271,20 @@ export async function translateFormData(data: any, country: string) {
 
   // Extraindo apenas os campos que o usuário deseja traduzir via IA
   const fieldsToTranslate = {
+    nationality: data.nationality,
     medications: data.medications,
     allergies: data.allergies,
     diseaseType: data.diseaseType,
   };
 
-  const prompt = `Translate the following medical data into the primary language of "${country}". 
+  const prompt = `Translate the following medical and personal data into the primary language of "${country}". 
   
   STRICT RULES:
   1. ONLY translate the text values.
   2. If a value is "---", "Não", "None", or empty, keep it exactly as is or translate only if it's a clear "No/None" term.
-  3. Keep the keys exactly as they are.
-  4. Return ONLY a JSON object.
+  3. For 'nationality', translate the nationality name to the destination language (e.g., 'Brasileira' becomes 'Brazilian' in English, 'Brasileño' in Spanish, etc.).
+  4. Keep the keys exactly as they are.
+  5. Return ONLY a JSON object.
   
   Data to translate:
   ${JSON.stringify(fieldsToTranslate, null, 2)}
@@ -298,11 +300,12 @@ export async function translateFormData(data: any, country: string) {
         responseSchema: {
           type: Type.OBJECT,
           properties: {
+            nationality: { type: Type.STRING },
             medications: { type: Type.STRING },
             allergies: { type: Type.STRING },
             diseaseType: { type: Type.STRING },
           },
-          required: ["medications", "allergies", "diseaseType"],
+          required: ["nationality", "medications", "allergies", "diseaseType"],
         },
       },
     });
