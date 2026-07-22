@@ -126,20 +126,52 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
 
   /* ── Inicialização: verifica sessão ── */
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const checkHashAndSession = async () => {
+      const hash = window.location.hash || "";
+      const searchParams = new URLSearchParams(window.location.search);
+      const isInviteOrRecovery = hash.includes("access_token") || searchParams.has("type") || hash.includes("type=signup") || hash.includes("type=invite") || hash.includes("type=recovery");
+
+      const { data: { session } } = await supabase.auth.getSession();
+      
       if (session) {
-        setSession(session);
+        // Se temos sessão, mas é o fluxo de primeiro acesso por convite/cadastro ou link:
+        if (isInviteOrRecovery || (session.user?.app_metadata?.provider === "email" && !session.user?.last_sign_in_at)) {
+          // Mantém desautenticado temporariamente no front para que ele defina as credenciais manualmente na tela de signup
+          setSession(null);
+          // O e-mail NÃO deve ser preenchido automaticamente, o usuário deve digitar manualmente.
+          setEmail("");
+          setScreen("signup");
+        } else {
+          setSession(session);
+        }
       } else {
-        setScreen("login");
+        if (isInviteOrRecovery) {
+          setEmail("");
+          setScreen("signup");
+        } else {
+          setScreen("login");
+        }
       }
-    });
+    };
+
+    checkHashAndSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === "SIGNED_IN" && session && !handledRef.current) {
-          handledRef.current = true;
-          setSession(session);
-          setScreen("checking"); // força re-render limpo
+      async (event, session) => {
+        if (event === "SIGNED_IN" && session) {
+          const hash = window.location.hash || "";
+          const isFirstAccess = hash.includes("type=invite") || hash.includes("type=signup") || hash.includes("type=recovery") || !session.user?.last_sign_in_at;
+
+          if (isFirstAccess && !handledRef.current) {
+            handledRef.current = true;
+            setSession(null);
+            setEmail("");
+            setScreen("signup");
+          } else if (!handledRef.current) {
+            handledRef.current = true;
+            setSession(session);
+            setScreen("checking"); // força re-render limpo
+          }
         }
         if (event === "SIGNED_OUT") {
           handledRef.current = false;
@@ -209,24 +241,55 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     }
 
     setBusy(true);
-    const { error } = await supabase.auth.signUp({
-      email: email.trim(),
-      password: newPwd.value,
-      options: {
-        emailRedirectTo: "https://copiadeseguranca.com/potchx/",
-      },
-    });
 
-    if (error) {
-      if (error.message.toLowerCase().includes("already registered")) {
-        setError("Este e-mail já está cadastrado. Use a tela de login.");
-      } else {
+    // Se o usuário veio por um convite, ele já está pré-autenticado temporariamente na sessão ou nós atualizamos via updateUser.
+    // Primeiro tentamos atualizar a senha do usuário logado (caso ele tenha entrado via link e esteja no fluxo de primeiro acesso).
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+
+    if (currentSession) {
+      // Usuário está temporariamente logado via link de convite. Atualiza a senha.
+      const { error } = await supabase.auth.updateUser({
+        password: newPwd.value
+      });
+
+      if (error) {
         setError(error.message);
+        setBusy(false);
+      } else {
+        // Sucesso: Autentica o usuário no front e redireciona
+        setSession(currentSession);
+        setBusy(false);
       }
     } else {
-      setScreen("verify_email");
+      // Caso comum: Usuário está preenchendo o formulário sem uma sessão de convite ativa no momento.
+      // Tentamos o signUp normal.
+      const { error, data } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: newPwd.value,
+        options: {
+          emailRedirectTo: "https://copiadeseguranca.com/potchx/",
+        },
+      });
+
+      if (error) {
+        if (error.message.toLowerCase().includes("already registered")) {
+          // Se o usuário já está cadastrado (foi convidado via admin no webhook), 
+          // mas não está com sessão ativa (por exemplo, clicou no link mas a sessão expirou),
+          // ele deve definir a senha. Como não há sessão ativa, instruímos que use a recuperação de senha
+          // ou tentamos fazer signIn com a senha digitada se ele já a definiu.
+          setError("Este e-mail já está pré-cadastrado. Por favor, acesse o link enviado ao seu e-mail.");
+        } else {
+          setError(error.message);
+        }
+      } else {
+        if (data.session) {
+          setSession(data.session);
+        } else {
+          setScreen("verify_email");
+        }
+      }
+      setBusy(false);
     }
-    setBusy(false);
   };
 
   /* ─────────────────────────────────────────────────────────
@@ -331,7 +394,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
       {screen === "signup" && (
         <div style={{ ...s.glass, maxWidth: "440px" }}>
           <div style={s.logoWrap}><ShieldLogo /></div>
-          <h1 style={s.title}>Criar conta</h1>
+          <h1 style={s.title}>Crie seu acesso ao PotchX</h1>
           <p style={s.subtitle}>Defina seu e-mail e senha de acesso</p>
 
           <form onSubmit={handleSignup} style={s.form} noValidate>
@@ -382,7 +445,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
 
             {error && <p style={s.errorMsg}>{error}</p>}
 
-            <Btn loading={busy} label="Criar conta e enviar confirmação" />
+            <Btn loading={busy} label="Confirmar cadastro" />
           </form>
 
           <button style={{ ...s.ghost, marginTop: 16 }}
