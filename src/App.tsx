@@ -30,6 +30,8 @@ import {
   TranslatedForm,
 } from "./constants/translations";
 import { translateFormData } from "./services/geminiService";
+import { saveEmergencyCard } from "./services/emergencyCardService";
+import { authService } from "./services/authService";
 
 interface FormData {
   fullName: string;
@@ -411,6 +413,26 @@ export default function App() {
       const fileName = `PotchX-${formData.fullName.replace(/\s+/g, "-").toLowerCase() || "documento"}.pdf`;
       pdf.save(fileName);
 
+      // Salva os dados do cartão no Supabase em segundo plano
+      saveEmergencyCard({
+        full_name: formData.fullName,
+        blood_type: formData.bloodType,
+        rh_factor: formData.rhFactor,
+        nationality: formData.nationality,
+        medications: formData.medications,
+        allergies: formData.allergies,
+        disease_type: formData.diseaseType,
+        hotel_address: formData.hotelAddress,
+        hotel_phone: formData.hotelPhone,
+        destination_country: formData.destinationCountry,
+        emergency_name: formData.emergencyName,
+        emergency_phone: formData.emergencyPhone,
+        passport_image_url: passportImage ?? undefined,
+        destination_language: destIdentifiedLanguage ?? undefined,
+      }).catch((err) =>
+        console.error("Erro ao salvar no Supabase:", err)
+      );
+
       setShowSuccess(true);
     } catch (err) {
       console.error("Erro ao gerar PDF:", err);
@@ -479,7 +501,7 @@ export default function App() {
                       "Baixar PDF Novamente"}
                   </button>
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       setShowSuccess(false);
                       setShowPreview(false);
                       setShowForm(false);
@@ -502,6 +524,7 @@ export default function App() {
                         emergencyName: "",
                         emergencyPhone: "",
                       });
+                      await authService.signOut();
                     }}
                     className="w-full py-3 px-8 rounded-2xl bg-zinc-100 text-zinc-600 font-bold hover:bg-zinc-200 transition-all"
                   >
@@ -1100,60 +1123,7 @@ export default function App() {
                       }}
                     >
                       {(() => {
-                        const colors = getCountryColors(formData.destinationCountry);
-                        const borderThickness = "12px";
-                        return (
-                          <>
-                            <div
-                              className="absolute top-0 left-0 right-0 flex z-20"
-                              style={{ height: borderThickness }}
-                            >
-                              {colors.map((c, i) => (
-                                <div
-                                  key={i}
-                                  className="flex-1"
-                                  style={{ backgroundColor: c, height: borderThickness }}
-                                />
-                              ))}
-                            </div>
-                            <div
-                              className="absolute bottom-0 left-0 right-0 flex z-20"
-                              style={{ height: borderThickness }}
-                            >
-                              {colors.map((c, i) => (
-                                <div
-                                  key={i}
-                                  className="flex-1"
-                                  style={{ backgroundColor: c, height: borderThickness }}
-                                />
-                              ))}
-                            </div>
-                            <div
-                              className="absolute top-0 bottom-0 left-0 flex flex-col z-20"
-                              style={{ width: borderThickness }}
-                            >
-                              {colors.map((c, i) => (
-                                <div
-                                  key={i}
-                                  className="flex-1"
-                                  style={{ backgroundColor: c, width: borderThickness }}
-                                />
-                              ))}
-                            </div>
-                            <div
-                              className="absolute top-0 bottom-0 right-0 flex flex-col z-20"
-                              style={{ width: borderThickness }}
-                            >
-                              {colors.map((c, i) => (
-                                <div
-                                  key={i}
-                                  className="flex-1"
-                                  style={{ backgroundColor: c, width: borderThickness }}
-                                />
-                              ))}
-                            </div>
-                          </>
-                        );
+                        return null;
                       })()}
                       <div
                         style={{
@@ -1516,60 +1486,7 @@ export default function App() {
                         }}
                       >
                         {(() => {
-                          const colors = getCountryColors(formData.destinationCountry);
-                          const borderThickness = "12px";
-                          return (
-                            <>
-                              <div
-                                className="absolute top-0 left-0 right-0 flex z-20"
-                                style={{ height: borderThickness }}
-                              >
-                                {colors.map((c, i) => (
-                                  <div
-                                    key={i}
-                                    className="flex-1"
-                                    style={{ backgroundColor: c, height: borderThickness }}
-                                  />
-                                ))}
-                              </div>
-                              <div
-                                className="absolute bottom-0 left-0 right-0 flex z-20"
-                                style={{ height: borderThickness }}
-                              >
-                                {colors.map((c, i) => (
-                                  <div
-                                    key={i}
-                                    className="flex-1"
-                                    style={{ backgroundColor: c, height: borderThickness }}
-                                  />
-                                ))}
-                              </div>
-                              <div
-                                className="absolute top-0 bottom-0 left-0 flex flex-col z-20"
-                                style={{ width: borderThickness }}
-                              >
-                                {colors.map((c, i) => (
-                                  <div
-                                    key={i}
-                                    className="flex-1"
-                                    style={{ backgroundColor: c, width: borderThickness }}
-                                  />
-                                ))}
-                              </div>
-                              <div
-                                className="absolute top-0 bottom-0 right-0 flex flex-col z-20"
-                                style={{ width: borderThickness }}
-                              >
-                                {colors.map((c, i) => (
-                                  <div
-                                    key={i}
-                                    className="flex-1"
-                                    style={{ backgroundColor: c, width: borderThickness }}
-                                  />
-                                ))}
-                              </div>
-                            </>
-                          );
+                          return null;
                         })()}
                         <div
                           style={{
@@ -1583,7 +1500,7 @@ export default function App() {
                             style={{
                               fontFamily:
                                 "'Nunito', 'Arial Rounded MT Bold', 'Gotham Rounded', 'Poppins', sans-serif",
-                              fontSize: "72px",
+                              fontSize: "150px",
                               fontWeight: 800,
                               letterSpacing: "8px",
                               margin: 0,
