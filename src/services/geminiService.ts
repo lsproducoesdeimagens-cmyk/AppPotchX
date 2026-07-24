@@ -266,29 +266,27 @@ export async function getTranslatedForm(country: string) {
 }
 
 export async function translateFormData(data: any, country: string) {
-  const model = "gemini-2.5-flash"; // Usando 2.5 Flash que é mais eficiente para o plano gratuito
+  const model = "gemini-2.5-flash";
   const ai = getAI();
 
-  // Extraindo apenas os campos que o usuário deseja traduzir via IA
+  // Apenas os três campos de dados médicos digitados pelo usuário são enviados para a IA.
+  // Rótulos, títulos e demais textos já são traduzidos localmente e não são enviados.
   const fieldsToTranslate = {
-    nationality: data.nationality,
     medications: data.medications,
     allergies: data.allergies,
     diseaseType: data.diseaseType,
   };
 
-  const prompt = `Translate the following medical and personal data into the primary language of "${country}". 
-  
+  const prompt = `Translate the following medical data values into the primary language of "${country}".
+
   STRICT RULES:
-  1. ONLY translate the text values.
-  2. If a value is "---", "Não", "None", or empty, keep it exactly as is or translate only if it's a clear "No/None" term.
-  3. For 'nationality', translate the nationality name to the destination language (e.g., 'Brasileira' becomes 'Brazilian' in English, 'Brasileño' in Spanish, etc.).
-  4. Keep the keys exactly as they are.
-  5. Return ONLY a JSON object.
-  
+  1. ONLY translate the text values — do NOT translate keys.
+  2. If a value is "---", "Não", "None", or empty, keep it as is or use the equivalent "No/None" term in the destination language.
+  3. Do NOT add explanations or extra text — return ONLY a JSON object.
+
   Data to translate:
   ${JSON.stringify(fieldsToTranslate, null, 2)}
-  
+
   Return a JSON object with the same keys.`;
 
   try {
@@ -300,25 +298,27 @@ export async function translateFormData(data: any, country: string) {
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            nationality: { type: Type.STRING },
             medications: { type: Type.STRING },
             allergies: { type: Type.STRING },
             diseaseType: { type: Type.STRING },
           },
-          required: ["nationality", "medications", "allergies", "diseaseType"],
+          required: ["medications", "allergies", "diseaseType"],
         },
       },
     });
 
     const translatedFields = JSON.parse(response.text);
 
-    // Retorna o objeto completo, mantendo os dados originais e apenas substituindo os traduzidos pela IA
+    // Retorna o objeto completo, substituindo apenas os três campos médicos pelos traduzidos.
+    // Todos os demais dados (nome, nacionalidade, hotel, etc.) permanecem intocados.
     return {
       ...data,
-      ...translatedFields,
+      medications: translatedFields.medications,
+      allergies: translatedFields.allergies,
+      diseaseType: translatedFields.diseaseType,
     };
   } catch (error) {
-    console.error("Error translating form data:", error);
+    console.error("Error translating medical data:", error);
     return data;
   }
 }
