@@ -1,12 +1,26 @@
 /**
- * AuthWrapper — Gerencia autenticação própria para o PotchX utilizando MockAuthService e localStorage.
+ * AuthWrapper — Gerencia autenticação do PotchX via Supabase Auth.
  *
  * Estados:
- *  - checking      : verificando sessão existente
- *  - login         : tela de login (acessos subsequentes)
- *  - signup        : tela de cadastro de e-mail e senha
+ *  - checking       : verificando sessão ou licença
+ *  - login          : tela de login
+ *  - signup         : tela de cadastro (qualquer e-mail e senha)
  *  - forgot_password: tela de solicitação de redefinição de senha
  *  - new_password   : tela de definição de nova senha
+ *  - no_access      : usuário autenticado mas sem licença ativa
+ *
+ * Fluxo de acesso (Stripe → licença → signup → app):
+ *  1. Comprador paga no Stripe → webhook registra licença em stripe_subscriptions (user_id = null)
+ *  2. Usuário final (pode ser outra pessoa) abre o app e cria conta com qualquer e-mail/senha
+ *  3. Após login, AuthWrapper verifica licença ativa em stripe_subscriptions
+ *  4. Se licença disponível (user_id IS NULL) → reivindica e libera acesso
+ *  5. Se licença já vinculada ao user_id → libera acesso
+ *  6. Se nenhuma licença ativa → tela no_access
+ *
+ * Fluxo de recovery (esqueci minha senha):
+ *  1. Usuário clica em "Forgot Password" → Supabase envia link com type=recovery
+ *  2. AuthWrapper detecta type=recovery na URL → exibe tela new_password
+ *  3. Ao confirmar, chama supabase.auth.updateUser({ password })
  *
  * Regras de senha:
  *  - mínimo 6 caracteres
@@ -21,11 +35,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { Session } from "./services/interfaces/types";
 import { authService } from "./services/authService";
+import { supabase } from "./services/supabaseClient";
 
 /* ─────────────────────────────────────────────────────────────
    Tipos
    ───────────────────────────────────────────────────────────── */
-type AuthScreen = "checking" | "login" | "signup" | "forgot_password" | "new_password";
+type AuthScreen = "checking" | "login" | "signup" | "forgot_password" | "new_password" | "no_access";
 
 interface PasswordStrength {
   minLength: boolean;
@@ -107,6 +122,73 @@ function usePasswordField(initial = "") {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   Verificação e reivindicação de slot de licença via RPC Supabase
+   ─────────────────────────────────────────────────────────────
+   A função RPC `claim_license_slot` (SECURITY DEFINER) é atômica.
+   Validação: Usuário → license_users → stripe_subscriptions (plano, status, validade)
+   ───────────────────────────────────────────────────────────── */
+
+interface LicenseResult {
+  access:    boolean;
+  reason:    string;       // existing_user | new_user_claimed | license_full | license_expired | no_active_license | rpc_error
+  plan?:     string;
+  max_users?: number;
+}
+
+interface NoAccessInfo {
+  title:    string;
+  subtitle: string;
+  body:     string;
+}
+
+/** Chama a RPC atômica que verifica e/ou reivindica um slot de licença. */
+async function claimLicenseSlot(userId: string): Promise<LicenseResult> {
+  try {
+    const { data, error } = await supabase.rpc("claim_license_slot", { p_user_id: userId });
+    if (error) {
+      console.error("[AuthWrapper] RPC claim_license_slot error:", error.message);
+      return { access: false, reason: "rpc_error" };
+    }
+    return (data ?? { access: false, reason: "unknown" }) as LicenseResult;
+  } catch {
+    return { access: false, reason: "rpc_error" };
+  }
+}
+
+/** Retorna o conteúdo da tela no_access de acordo com a razão do bloqueio. */
+function getLicenseBlockMessage(result: LicenseResult): NoAccessInfo {
+  const max = result.max_users ?? 1;
+  const plural = max > 1 ? "users" : "user";
+
+  switch (result.reason) {
+    case "license_full":
+      return {
+        title:    "License Limit Reached",
+        subtitle: `This license allows up to ${max} ${plural}. All slots are taken.`,
+        body:     "To add more users, upgrade your plan or contact support.",
+      };
+    case "license_expired":
+      return {
+        title:    "License Expired",
+        subtitle: "Your access license has expired.",
+        body:     "Please renew your subscription to restore access. Your account data is preserved.",
+      };
+    case "no_active_license":
+      return {
+        title:    "Access Not Found",
+        subtitle: "No active license was found for this account.",
+        body:     "Complete your purchase to activate access, or contact support if you believe this is an error.",
+      };
+    default:
+      return {
+        title:    "Access Not Found",
+        subtitle: "Could not verify your license. Please try again.",
+        body:     "If the problem persists, sign out and sign back in, or contact support.",
+      };
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
    Componente principal
    ───────────────────────────────────────────────────────────── */
 export default function AuthWrapper({ children }: AuthWrapperProps) {
@@ -116,6 +198,15 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   const [error, setError]     = useState("");
   const [info, setInfo]       = useState("");
   const [busy, setBusy]       = useState(false);
+  // Controla se o usuário está no fluxo de recovery (redefinição de senha)
+  // Evita que o onAuthStateChange execute a verificação de licença durante o recovery
+  const inRecoveryRef = useRef(false);
+  // Mensagem dinâmica exibida na tela no_access conforme a razão do bloqueio
+  const [noAccessInfo, setNoAccessInfo] = useState<NoAccessInfo>({
+    title:    "Access Not Found",
+    subtitle: "No active license was found for this account.",
+    body:     "Complete your purchase to activate access, or contact support if you believe this is an error.",
+  });
 
   // Campos de senha
   const newPwd     = usePasswordField();
@@ -128,11 +219,79 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   // Referência para evitar loop no listener
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
 
-  /* ── Inicialização: verifica sessão ── */
+  /* ── Inicialização: verifica sessão e trata link de recovery na URL ── */
   useEffect(() => {
-    subscriptionRef.current = authService.onAuthStateChange((sess) => {
-      setSession(sess);
-      setScreen("login"); // Se sess for diferente de null, o render acima de session intercepta
+    // ── 1. Verifica parâmetros de recovery na URL ──────────────────────────
+    // O Supabase envia links de reset com: ?token_hash=...&type=recovery
+    // Esses parâmetros chegam como hash (#) ou query string (?)
+    const parseAuthParams = () => {
+      // Supabase usa hash fragment (#access_token=...&type=...)
+      const hash = window.location.hash.substring(1);
+      // Ou query string (?token_hash=...&type=...)
+      const search = window.location.search.substring(1);
+
+      const params = new URLSearchParams(hash || search);
+      return {
+        tokenHash:   params.get("token_hash"),
+        type:        params.get("type"),
+        accessToken: params.get("access_token"),
+        refreshToken:params.get("refresh_token"),
+      };
+    };
+
+    const { tokenHash, type, accessToken, refreshToken } = parseAuthParams();
+
+    if (accessToken && refreshToken) {
+      // Link com access_token direto (formato legado Supabase ou magic link)
+      // Seta a sessão diretamente para que onAuthStateChange a processe
+      supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }).then(({ error }) => {
+        if (error) {
+          console.error("[AuthWrapper] Erro ao setar sessão do link:", error.message);
+          setScreen("login");
+        }
+        // A sessão será capturada pelo onAuthStateChange abaixo
+      });
+    } else if (tokenHash && type === "recovery") {
+      // Link de redefinição de senha (Forgot Password)
+      supabase.auth.verifyOtp({ token_hash: tokenHash, type: "recovery" }).then(({ error }) => {
+        if (error) {
+          console.error("[AuthWrapper] Erro ao verificar OTP de recovery:", error.message);
+          setScreen("login");
+        } else {
+          // Sessão temporária criada para recovery — exibe tela de nova senha
+          inRecoveryRef.current = true;
+          setScreen("new_password");
+        }
+      });
+    }
+
+    // ── 2. Listener de mudança de estado de autenticação ──────────────────────
+    // Após qualquer login/signup bem-sucedido, verifica se existe licença ativa.
+    // O acesso é liberado pela LICENÇA (não pelo e-mail do comprador).
+    subscriptionRef.current = authService.onAuthStateChange(async (sess) => {
+      if (sess) {
+        // Durante o fluxo de recovery, a sessão temporária não deve acionar
+        // a verificação de licença — o usuário ainda está redefinindo a senha.
+        if (inRecoveryRef.current) return;
+
+        // Verifica/reivindica slot de licença via RPC (atômica, tipada por plano)
+        setScreen("checking");
+        const result = await claimLicenseSlot(sess.user.id);
+        if (result.access) {
+          setSession(sess);
+        } else {
+          // Usuário autenticado mas sem licença válida: exibe motivo específico
+          setNoAccessInfo(getLicenseBlockMessage(result));
+          setSession(null);
+          setScreen("no_access");
+        }
+      } else {
+        setSession(null);
+        // Não sobrescreve a tela se estiver no fluxo de recovery
+        if (!inRecoveryRef.current) {
+          setScreen("login");
+        }
+      }
     });
 
     return () => {
@@ -189,7 +348,9 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     }
   }
 
-  /** SIGNUP — criar conta */
+  /** SIGNUP — cria conta Supabase Auth com e-mail e senha escolhidos pelo usuário.
+   * Qualquer e-mail é aceito — não precisa ser o e-mail do comprador Stripe.
+   * A licença é verificada após o login pelo checkAndClaimLicense. */
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     clearMessages();
@@ -249,7 +410,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     }
   }
 
-  /** DEFINIR NOVA SENHA */
+  /** DEFINIR NOVA SENHA — fluxo de recovery (link enviado por e-mail) */
   async function handleNewPassword(e: React.FormEvent) {
     e.preventDefault();
     clearMessages();
@@ -264,20 +425,24 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
       return;
     }
 
+    // Limpa o flag de recovery ANTES de chamar updatePassword.
+    // Assim, quando onAuthStateChange disparar após o update,
+    // a verificação de licença será executada normalmente.
+    inRecoveryRef.current = false;
+
     setBusy(true);
-    const res = await authService.updatePassword(newPwd.value, email);
+    const res = await authService.updatePassword(newPwd.value);
     setBusy(false);
 
     if (res.error) {
+      inRecoveryRef.current = true; // restaura o flag se a atualização falhou
       setError(res.error);
     } else {
       setInfo("Password successfully changed.");
       newPwd.setValue("");
       confirmPwd.setValue("");
-      setTimeout(() => {
-        setScreen("login");
-        clearMessages();
-      }, 1500);
+      // onAuthStateChange dispara com a sessão ativa e a verificação de licença
+      // será executada automaticamente (inRecoveryRef já é false).
     }
   }
 
@@ -498,6 +663,27 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
             onClick={() => { setScreen("login"); clearMessages(); newPwd.setValue(""); confirmPwd.setValue(""); }}>
             ← Back to Login
           </button>
+        </div>
+      )}
+
+      {/* ── TELA: SEM LICENÇA ATIVA ── */}
+      {screen === "no_access" && (
+        <div style={s.glass}>
+          <div style={s.logoWrap}><ShieldLogo /></div>
+          <h1 style={s.title}>{noAccessInfo.title}</h1>
+          <p style={s.subtitle}>{noAccessInfo.subtitle}</p>
+          <p style={{ ...s.body, marginTop: 8 }}>
+            {noAccessInfo.body}
+          </p>
+          <button
+            style={{ ...s.ghost, marginTop: 24 }}
+            onClick={async () => {
+              await authService.signOut();
+            }}
+          >
+            ← Sign Out
+          </button>
+          <p style={s.footer}>PotchX &copy; {new Date().getFullYear()}</p>
         </div>
       )}
 
