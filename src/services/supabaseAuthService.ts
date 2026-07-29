@@ -33,7 +33,13 @@ export class SupabaseAuthService implements IAuthService {
   // Cria um novo usuário no Supabase Auth.
   // Usado quando o cliente clica no link de convite e define a sua senha.
   async signUp(email: string, password: string): Promise<AuthResponse> {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: "https://copiadeseguranca.com/potchx/",
+      },
+    });
 
     if (error) {
       return { user: null, session: null, error: error.message };
@@ -103,7 +109,7 @@ export class SupabaseAuthService implements IAuthService {
   // O link no e-mail terá type=recovery e redirecionará para o app.
   async resetPassword(email: string): Promise<{ error: string | null }> {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + window.location.pathname,
+      redirectTo: "https://copiadeseguranca.com/potchx/",
     });
     return { error: error?.message ?? null };
   }
