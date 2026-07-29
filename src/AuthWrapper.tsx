@@ -142,9 +142,12 @@ interface NoAccessInfo {
 }
 
 /** Chama a RPC atômica que verifica e/ou reivindica um slot de licença. */
-async function claimLicenseSlot(userId: string): Promise<LicenseResult> {
+async function claimLicenseSlot(userId: string, buyerEmail?: string | null): Promise<LicenseResult> {
   try {
-    const { data, error } = await supabase.rpc("claim_license_slot", { p_user_id: userId });
+    const { data, error } = await supabase.rpc("claim_license_slot", {
+      p_user_id:     userId,
+      p_buyer_email: buyerEmail || null,
+    });
     if (error) {
       console.error("[AuthWrapper] RPC claim_license_slot error:", error.message);
       return { access: false, reason: "rpc_error" };
@@ -244,6 +247,14 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
 
     const { tokenHash, type, accessToken, refreshToken } = parseAuthParams();
 
+    // Captura o buyer_email da URL e persiste no sessionStorage para não perder na navegação
+    const buyerEmailParam = new URLSearchParams(window.location.search).get("buyer_email");
+    if (buyerEmailParam) {
+      sessionStorage.setItem("potchx_buyer_email", buyerEmailParam);
+      // Limpa os parâmetros de busca para manter a URL do app limpa
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     // Se for detectado fluxo de convite (invite), nós destruímos a sessão temporária
     // gerada pelo link do Supabase, limpamos a URL e abrimos a tela de login vazia.
     if (type === "invite" || (accessToken && type === "invite")) {
@@ -288,9 +299,12 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
         // Se estiver no fluxo de recovery ou limpando o convite, não faz a verificação
         if (inRecoveryRef.current || isResettingInviteRef.current) return;
 
+        // Recupera o buyer_email armazenado no sessionStorage
+        const savedBuyerEmail = sessionStorage.getItem("potchx_buyer_email");
+
         // Verifica/reivindica slot de licença via RPC (atômica, tipada por plano)
         setScreen("checking");
-        const result = await claimLicenseSlot(sess.user.id);
+        const result = await claimLicenseSlot(sess.user.id, savedBuyerEmail);
         if (result.access) {
           setSession(sess);
         } else {
