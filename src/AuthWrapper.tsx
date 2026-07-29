@@ -201,6 +201,9 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   // Controla se o usuário está no fluxo de recovery (redefinição de senha)
   // Evita que o onAuthStateChange execute a verificação de licença durante o recovery
   const inRecoveryRef = useRef(false);
+  // Controla se estamos limpando a sessão após um link de convite (invite)
+  // Evita que o onAuthStateChange processe a sessão temporária de convite criada pelo link
+  const isResettingInviteRef = useRef(false);
   // Mensagem dinâmica exibida na tela no_access conforme a razão do bloqueio
   const [noAccessInfo, setNoAccessInfo] = useState<NoAccessInfo>({
     title:    "Access Not Found",
@@ -241,6 +244,18 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
 
     const { tokenHash, type, accessToken, refreshToken } = parseAuthParams();
 
+    // Se for detectado fluxo de convite (invite), nós destruímos a sessão temporária
+    // gerada pelo link do Supabase, limpamos a URL e abrimos a tela de login vazia.
+    if (type === "invite" || (accessToken && type === "invite")) {
+      isResettingInviteRef.current = true;
+      authService.signOut().then(() => {
+        window.history.replaceState({}, document.title, window.location.pathname);
+        isResettingInviteRef.current = false;
+        setScreen("login");
+      });
+      return;
+    }
+
     if (accessToken && refreshToken) {
       // Link com access_token direto (formato legado Supabase ou magic link)
       // Seta a sessão diretamente para que onAuthStateChange a processe
@@ -270,9 +285,8 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     // O acesso é liberado pela LICENÇA (não pelo e-mail do comprador).
     subscriptionRef.current = authService.onAuthStateChange(async (sess) => {
       if (sess) {
-        // Durante o fluxo de recovery, a sessão temporária não deve acionar
-        // a verificação de licença — o usuário ainda está redefinindo a senha.
-        if (inRecoveryRef.current) return;
+        // Se estiver no fluxo de recovery ou limpando o convite, não faz a verificação
+        if (inRecoveryRef.current || isResettingInviteRef.current) return;
 
         // Verifica/reivindica slot de licença via RPC (atômica, tipada por plano)
         setScreen("checking");
