@@ -167,19 +167,19 @@ function getLicenseBlockMessage(result: LicenseResult): NoAccessInfo {
     case "license_full":
       return {
         title:    "License Limit Reached",
-        subtitle: `This license allows up to ${max} ${plural}. All slots are taken.`,
+        subtitle: `License Limit Reached — This license allows up to ${max} ${plural}.`,
         body:     "To add more users, upgrade your plan or contact support.",
       };
     case "license_expired":
       return {
         title:    "License Expired",
-        subtitle: "Your access license has expired.",
+        subtitle: "License Expired — Please renew your subscription.",
         body:     "Please renew your subscription to restore access. Your account data is preserved.",
       };
     case "no_active_license":
       return {
         title:    "Access Not Found",
-        subtitle: "No active license was found for this account.",
+        subtitle: "Access Not Found — Complete your purchase.",
         body:     "Complete your purchase to activate access, or contact support if you believe this is an error.",
       };
     default:
