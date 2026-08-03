@@ -327,7 +327,10 @@ export default function App() {
     if (labelsResult) {
       setPreviewTranslations(labelsResult);
     }
-    setTranslatedData(formData);
+    // Só reseta se não houver tradução ativa da IA
+    if (!lastTranslatedData) {
+      setTranslatedData(formData);
+    }
   }, [
     formData.destinationCountry,
     formData.emergencyName,
