@@ -7,4 +7,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn("Supabase URL or Anon Key is missing in environment variables (.env). Please make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.");
 }
 
-export const supabase = createClient(supabaseUrl || "", supabaseAnonKey || "");
+export const supabase = createClient(supabaseUrl || "", supabaseAnonKey || "", {
+  auth: {
+    persistSession: true,
+    storage: window.sessionStorage,
+  },
+});
+

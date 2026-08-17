@@ -197,7 +197,9 @@ function getLicenseBlockMessage(result: LicenseResult): NoAccessInfo {
 export default function AuthWrapper({ children }: AuthWrapperProps) {
   const [screen, setScreen]   = useState<AuthScreen>("checking");
   const [session, setSession] = useState<Session | null>(null);
-  const [email, setEmail]     = useState("");
+  const [email, setEmail]     = useState(() => {
+    return localStorage.getItem("potchx_last_user_email") || "";
+  });
   const [error, setError]     = useState("");
   const [info, setInfo]       = useState("");
   const [busy, setBusy]       = useState(false);
@@ -317,7 +319,12 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
         setSession(null);
         // Não sobrescreve a tela se estiver no fluxo de recovery
         if (!inRecoveryRef.current) {
-          setScreen("login");
+          const savedBuyerEmail = sessionStorage.getItem("potchx_buyer_email");
+          if (savedBuyerEmail) {
+            setScreen("signup");
+          } else {
+            setScreen("login");
+          }
         }
       }
     });
@@ -371,6 +378,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     if (res.error) {
       setError(res.error);
     } else {
+      localStorage.setItem("potchx_last_user_email", email);
       setSession(res.session);
       loginPwd.setValue("");
     }
@@ -405,13 +413,18 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     if (res.error) {
       setError(res.error);
     } else {
+      localStorage.setItem("potchx_last_user_email", email);
       setInfo("Account successfully created.");
       newPwd.setValue("");
       confirmPwd.setValue("");
-      setTimeout(() => {
-        setScreen("login");
-        clearMessages();
-      }, 1500);
+      if (res.session) {
+        setSession(res.session);
+      } else {
+        setTimeout(() => {
+          setScreen("login");
+          clearMessages();
+        }, 1500);
+      }
     }
   }
 
