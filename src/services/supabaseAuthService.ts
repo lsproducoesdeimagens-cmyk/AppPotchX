@@ -33,11 +33,15 @@ export class SupabaseAuthService implements IAuthService {
   // Cria um novo usuário no Supabase Auth.
   // Usado quando o cliente clica no link de convite e define a sua senha.
   async signUp(email: string, password: string): Promise<AuthResponse> {
+    const savedBuyerEmail = sessionStorage.getItem("potchx_buyer_email") || "";
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: "https://copiadeseguranca.com/potchx/",
+        data: {
+          buyer_email: savedBuyerEmail,
+        }
       },
     });
 

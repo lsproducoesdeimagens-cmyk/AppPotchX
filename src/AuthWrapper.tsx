@@ -321,7 +321,24 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
         if (!inRecoveryRef.current) {
           const savedBuyerEmail = sessionStorage.getItem("potchx_buyer_email");
           if (savedBuyerEmail) {
-            setScreen("signup");
+            // Verifica capacidade da licença antes de mostrar a tela de cadastro
+            setScreen("checking");
+            supabase.rpc("check_license_capacity", { p_buyer_email: savedBuyerEmail }).then(({ data, error }) => {
+              if (error || !data || !data.valid || data.available_slots <= 0) {
+                if (data && data.available_slots <= 0) {
+                  setNoAccessInfo({
+                    title: "Autenticação já utilizada",
+                    subtitle: "Todas as autorizações desta licença já foram utilizadas.",
+                    body: "Para criar uma nova conta, é necessário realizar um novo pagamento.",
+                  });
+                  setScreen("no_access");
+                } else {
+                  setScreen("login");
+                }
+              } else {
+                setScreen("signup");
+              }
+            });
           } else {
             setScreen("login");
           }
@@ -417,14 +434,28 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
       setInfo("Account successfully created.");
       newPwd.setValue("");
       confirmPwd.setValue("");
-      if (res.session) {
-        setSession(res.session);
-      } else {
-        setTimeout(() => {
-          setScreen("login");
-          clearMessages();
-        }, 1500);
+      
+      const savedBuyerEmail = sessionStorage.getItem("potchx_buyer_email");
+      if (savedBuyerEmail) {
+        // Verifica capacidade restante
+        const { data } = await supabase.rpc("check_license_capacity", { p_buyer_email: savedBuyerEmail });
+        if (data && data.valid && data.available_slots > 0) {
+          // Mantém na tela de cadastro limpa para as próximas contas, se ainda existirem vagas
+          setEmail("");
+          setInfo(`Account created successfully. ${data.available_slots} slots remaining. Create next account:`);
+          // Limpa sessão temporária do signup automático para permitir o próximo cadastro limpo
+          await authService.signOut();
+          setScreen("signup");
+          return;
+        }
       }
+
+      // Se todas as vagas foram preenchidas ou não há email na sessão, força logout e vai para tela de login
+      await authService.signOut();
+      setTimeout(() => {
+        setScreen("login");
+        clearMessages();
+      }, 1500);
     }
   }
 
@@ -532,25 +563,29 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
             <Btn loading={busy} label="Sign In" />
           </form>
 
-          <div style={s.divider}><span style={s.dividerText}>or</span></div>
+          {sessionStorage.getItem("potchx_buyer_email") && (
+            <>
+              <div style={s.divider}><span style={s.dividerText}>or</span></div>
 
-          <p style={s.body}>
-            First time here?{" "}
-            <button
-              style={s.linkBtn}
-              onClick={() => { setScreen("signup"); clearMessages(); loginPwd.setValue(""); }}
-            >
-              Create Account
-            </button>
-          </p>
-          <p style={{ ...s.body, marginTop: 8 }}>
-            <button
-              style={s.linkBtn}
-              onClick={() => { setScreen("forgot_password"); clearMessages(); loginPwd.setValue(""); }}
-            >
-              Forgot Password?
-            </button>
-          </p>
+              <p style={s.body}>
+                First time here?{" "}
+                <button
+                  style={s.linkBtn}
+                  onClick={() => { setScreen("signup"); clearMessages(); loginPwd.setValue(""); }}
+                >
+                  Create Account
+                </button>
+              </p>
+              <p style={{ ...s.body, marginTop: 8 }}>
+                <button
+                  style={s.linkBtn}
+                  onClick={() => { setScreen("forgot_password"); clearMessages(); loginPwd.setValue(""); }}
+                >
+                  Forgot Password?
+                </button>
+              </p>
+            </>
+          )}
           <p style={s.footer}>Restricted access · PotchX &copy; {new Date().getFullYear()}</p>
         </div>
       )}
