@@ -216,6 +216,8 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     body:     "Complete your purchase to activate access, or contact support if you believe this is an error.",
   });
 
+  const [registrationLimitExceeded, setRegistrationLimitExceeded] = useState(false);
+
   // Campos de senha
   const newPwd     = usePasswordField();
   const confirmPwd = usePasswordField();
@@ -329,16 +331,13 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
             supabase.rpc("check_license_capacity", { p_buyer_email: savedBuyerEmail }).then(({ data, error }) => {
               if (error || !data || !data.valid || data.available_slots <= 0) {
                 if (data && data.available_slots <= 0) {
-                  setNoAccessInfo({
-                    title: "Autenticação já utilizada",
-                    subtitle: "Todas as autorizações desta licença já foram utilizadas.",
-                    body: "Para criar uma nova conta, é necessário realizar um novo pagamento.",
-                  });
-                  setScreen("no_access");
+                  setRegistrationLimitExceeded(true);
+                  setScreen("signup");
                 } else {
                   setScreen("login");
                 }
               } else {
+                setRegistrationLimitExceeded(false);
                 setScreen("signup");
               }
             });
@@ -597,60 +596,73 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
       {screen === "signup" && (
         <div style={{ ...s.glass, maxWidth: "440px" }}>
           <div style={s.logoWrap}><ShieldLogo /></div>
-          <h1 style={s.title}>Create your account</h1>
-          <p style={s.subtitle}>Set your email and password</p>
+          
+          {registrationLimitExceeded ? (
+            <div style={{ textAlign: "center", padding: "20px 0" }}>
+              <div style={{ fontSize: "40px", marginBottom: "16px" }}>🔑 🔑</div>
+              <h2 style={{ ...s.title, color: "#ef4444" }}>REGISTRATION LIMIT EXCEEDED</h2>
+              <p style={{ ...s.subtitle, marginTop: "8px" }}>
+                Todas as autorizações desta licença já foram utilizadas.
+              </p>
+            </div>
+          ) : (
+            <>
+              <h1 style={s.title}>Create your account</h1>
+              <p style={s.subtitle}>Set your email and password</p>
 
-          <form onSubmit={handleSignup} style={s.form} noValidate>
-            {/* E-mail */}
-            <Field label="Email">
-              <input
-                id="signup-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                required
-                autoComplete="email"
-                style={s.input}
-                onFocus={(e) => focusStyle(e, true)}
-                onBlur={(e)  => focusStyle(e, false)}
-              />
-            </Field>
+              <form onSubmit={handleSignup} style={s.form} noValidate>
+                {/* E-mail */}
+                <Field label="Email">
+                  <input
+                    id="signup-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                    autoComplete="email"
+                    style={s.input}
+                    onFocus={(e) => focusStyle(e, true)}
+                    onBlur={(e)  => focusStyle(e, false)}
+                  />
+                </Field>
 
-            {/* Criar senha */}
-            <Field label="Create Password">
-              <PasswordInput field={newPwd} placeholder="Create your password" id="signup-pwd" />
-            </Field>
+                {/* Criar senha */}
+                <Field label="Create Password">
+                  <PasswordInput field={newPwd} placeholder="Create your password" id="signup-pwd" />
+                </Field>
 
-            {/* Indicador de força */}
-            {newPwd.value.length > 0 && (
-              <div style={s.strengthBox}>
-                <StrengthRow ok={strength.minLength} label="Minimum 6 characters" />
-                <StrengthRow ok={strength.hasUpper}   label="At least 1 uppercase letter" />
-                <StrengthRow ok={strength.hasLower}   label="At least 1 lowercase letter" />
-                <StrengthRow ok={strength.hasNumber}  label="At least 1 number" />
-                <StrengthRow ok={strength.hasSpecial} label="At least 1 symbol (@, #, $, %…)" />
-              </div>
-            )}
+                {/* Indicador de força */}
+                {newPwd.value.length > 0 && (
+                  <div style={s.strengthBox}>
+                    <StrengthRow ok={strength.minLength} label="Minimum 6 characters" />
+                    <StrengthRow ok={strength.hasUpper}   label="At least 1 uppercase letter" />
+                    <StrengthRow ok={strength.hasLower}   label="At least 1 lowercase letter" />
+                    <StrengthRow ok={strength.hasNumber}  label="At least 1 number" />
+                    <StrengthRow ok={strength.hasSpecial} label="At least 1 symbol (@, #, $, %…)" />
+                  </div>
+                )}
 
-            {/* Confirmar senha */}
-            <Field label="Confirm Password">
-              <PasswordInput field={confirmPwd} placeholder="Repeat password" id="signup-confirm" />
-            </Field>
+                {/* Confirmar senha */}
+                <Field label="Confirm Password">
+                  <PasswordInput field={confirmPwd} placeholder="Repeat password" id="signup-confirm" />
+                </Field>
 
-            {/* Feedback de comparação em tempo real */}
-            {confirmPwd.value.length > 0 && newPwd.value !== confirmPwd.value && (
-              <p style={s.warnMsg}>⚠ Passwords do not match.</p>
-            )}
-            {confirmPwd.value.length > 0 && newPwd.value === confirmPwd.value && (
-              <p style={s.okMsg}>✓ Passwords match.</p>
-            )}
+                {/* Feedback de comparação em tempo real */}
+                {confirmPwd.value.length > 0 && newPwd.value !== confirmPwd.value && (
+                  <p style={s.warnMsg}>⚠ Passwords do not match.</p>
+                )}
+                {confirmPwd.value.length > 0 && newPwd.value === confirmPwd.value && (
+                  <p style={s.okMsg}>✓ Passwords match.</p>
+                )}
 
-            {error && <p style={s.errorMsg}>{error}</p>}
-            {info && <p style={s.infoMsg}>{info}</p>}
+                {error && <p style={s.errorMsg}>{error}</p>}
+                {info && <p style={s.infoMsg}>{info}</p>}
 
-            <Btn loading={busy} label="Create Account" disabled={!isValid(strength) || newPwd.value !== confirmPwd.value} />
-          </form>
+                <Btn loading={busy} label="Create Account" disabled={!isValid(strength) || newPwd.value !== confirmPwd.value} />
+              </form>
+            </>
+          )}
 
           <button style={{ ...s.ghost, marginTop: 16 }}
             onClick={() => { setScreen("login"); clearMessages(); newPwd.setValue(""); confirmPwd.setValue(""); }}>
