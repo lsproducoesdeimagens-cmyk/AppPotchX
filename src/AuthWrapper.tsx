@@ -319,8 +319,11 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
         setSession(null);
         // Não sobrescreve a tela se estiver no fluxo de recovery
         if (!inRecoveryRef.current) {
-          const savedBuyerEmail = sessionStorage.getItem("potchx_buyer_email");
-          if (savedBuyerEmail) {
+          // Só tenta direcionar para o Cadastro e verificar a capacidade se o e-mail da licença veio ativamente da URL atual (fluxo de ativação)
+          const isLinkActivation = new URLSearchParams(window.location.search).has("buyer_email");
+          const savedBuyerEmail = localStorage.getItem("potchx_buyer_email");
+
+          if (isLinkActivation && savedBuyerEmail) {
             // Verifica capacidade da licença antes de mostrar a tela de cadastro
             setScreen("checking");
             supabase.rpc("check_license_capacity", { p_buyer_email: savedBuyerEmail }).then(({ data, error }) => {
