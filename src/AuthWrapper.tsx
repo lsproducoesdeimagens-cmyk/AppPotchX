@@ -441,11 +441,17 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
       if (savedBuyerEmail) {
         // Verifica capacidade restante
         const { data } = await supabase.rpc("check_license_capacity", { p_buyer_email: savedBuyerEmail });
-        if (data && data.valid && data.available_slots > 0) {
+        const slotsLeft = data?.available_slots ?? 0;
+        if (data && data.valid && slotsLeft > 0) {
           // Mantém na tela de cadastro limpa para as próximas contas, se ainda existirem vagas
           setEmail("");
-          setInfo(`Account created successfully. ${data.available_slots} slots remaining. Create next account:`);
+          setInfo(`Account created successfully. ${slotsLeft} token${slotsLeft !== 1 ? 's' : ''} remaining. Create next account:`);
           // Limpa sessão temporária do signup automático para permitir o próximo cadastro limpo
+          await authService.signOut();
+          setScreen("signup");
+          return;
+        } else if (data && data.valid && slotsLeft <= 0) {
+          setInfo("Zero Tokens — All slots have been used.");
           await authService.signOut();
           setScreen("signup");
           return;
@@ -599,10 +605,13 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
           
           {registrationLimitExceeded ? (
             <div style={{ textAlign: "center", padding: "20px 0" }}>
-              <div style={{ fontSize: "40px", marginBottom: "16px" }}>🔑 🔑</div>
-              <h2 style={{ ...s.title, color: "#ef4444" }}>REGISTRATION LIMIT EXCEEDED</h2>
+              <div style={{ fontSize: "48px", marginBottom: "16px" }}>🚫</div>
+              <h2 style={{ ...s.title, color: "#ef4444" }}>Zero Tokens</h2>
               <p style={{ ...s.subtitle, marginTop: "8px" }}>
-                Todas as autorizações desta licença já foram utilizadas.
+                All access slots for this license have been used.
+              </p>
+              <p style={{ ...s.subtitle, marginTop: "4px", fontSize: "12px", color: "#6b7280" }}>
+                To add more users, upgrade your plan.
               </p>
             </div>
           ) : (
