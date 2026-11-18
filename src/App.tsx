@@ -77,6 +77,130 @@ const CustomShield = ({
   </svg>
 );
 
+const PotchXLetterXBifold = ({ size = 50 }: { size?: number }) => (
+  <svg
+    viewBox="0 0 110 110"
+    style={{ height: size, width: "auto" }}
+    className="overflow-visible inline-block shrink-0 -ml-[0.08em]"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <defs>
+      <linearGradient id="potchxBifoldBlueLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stopColor="#0F8BC7" />
+        <stop offset="100%" stopColor="#21487F" />
+      </linearGradient>
+      <linearGradient id="potchxBifoldGreenRight" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stopColor="#87C244" />
+        <stop offset="100%" stopColor="#3A9957" />
+      </linearGradient>
+    </defs>
+    {/* 1. Camada de fundo (Lado direito Verde) */}
+    <path d="M104 8 H77 L54 44 L67 55 L104 8 Z" fill="url(#potchxBifoldGreenRight)" />
+    <path d="M67 55 L54 66 L77 102 H104 L67 55 Z" fill="url(#potchxBifoldGreenRight)" />
+    {/* 2. Camada da frente (Lado esquerdo Azul com recorte #031C3A) */}
+    <path
+      d="M6 8 H33 L58 45 Q64 55 58 65 L33 102 H6 L34 55 Z"
+      fill="url(#potchxBifoldBlueLeft)"
+      stroke="#031C3A"
+      strokeWidth="4.5"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const PotchXBifoldShield = ({
+  width = 105,
+  height = 120,
+}: {
+  width?: number;
+  height?: number;
+}) => (
+  <svg
+    viewBox="0 0 100 115"
+    style={{ width, height }}
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="shrink-0"
+  >
+    <defs>
+      <linearGradient id="potchxBifoldShieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#0F8BC7" />
+        <stop offset="38%" stopColor="#87C244" />
+        <stop offset="72%" stopColor="#3A9957" />
+        <stop offset="100%" stopColor="#21487F" />
+      </linearGradient>
+    </defs>
+    {/* Contorno externo fino */}
+    <path
+      d="M50 4 L90 19 V53 C90 81 72 101 50 111 C28 101 10 81 10 53 V19 L50 4 Z"
+      stroke="url(#potchxBifoldShieldGrad)"
+      strokeWidth="4"
+      fill="none"
+    />
+    {/* Preenchimento interno liso separado por espaço vazado no fundo */}
+    <path
+      d="M50 13 L81 25 V52 C81 75 66 92 50 101 C34 92 19 75 19 52 V25 L50 13 Z"
+      fill="url(#potchxBifoldShieldGrad)"
+    />
+  </svg>
+);
+
+const PRINTED_BACKUP_PHRASES: Record<string, string> = {
+  pt: "SUA CÓPIA DE SEGURANÇA IMPRESSA",
+  en: "YOUR PRINTED SECURITY BACKUP",
+  es: "SU COPIA DE SEGURIDAD IMPRESA",
+  fr: "VOTRE COPIE DE SÉCURITÉ IMPRIMÉE",
+  it: "LA TUA COPIA DI SICUREZZA STAMPATA",
+  de: "IHRE GEDRUCKTE SICHERHEITSKOPIE",
+  nl: "UW AFGEDRUKTE VEILIGHEIDSKOPIE",
+  ru: "ВАША ПЕЧАТНАЯ КОПИЯ БЕЗОПАСНОСТИ",
+  ja: "あなたの印刷されたセキュリティバックアップ",
+  zh: "您的打印安全备份",
+  ko: "귀하의 인쇄된 보안 백업",
+  ar: "نسختك الاحتياطية الأمنية المطبوعة",
+  hi: "आपका मुद्रित सुरक्षा बैकअप",
+  fa: "نسخه پشتیبان امنیتی چاپ شده شما",
+  th: "สำรองข้อมูลความปลอดภัยฉบับพิมพ์ของคุณ",
+  vi: "BẢN SAO LƯU AN NINH ĐƯỢC IN CỦA BẠN",
+  pl: "TWOJA DRUKOWANA KOPIA BEZPIECZEŃSTWA",
+  tr: "BASILI GÜVENLİK YEDEĞİNİZ",
+  el: "ΤΟ ΕΚΤΥΠΩΜΕΝΟ ΑΝΤΙΓΡΑΦΟ ΑΣΦΑΛΕΙΑΣ ΣΑΣ",
+  he: "גיבוי האבטחה המודפס שלך",
+  sv: "DIN UTSKRIVNA SÄKERHETSKOPIA",
+  da: "DIN UDSKREVNE SIKKERHEDSKOPI",
+  no: "DIN UTSKREVNE SIKKERHETSKOPI",
+  fi: "TULOSTETTU TURVAKOPIOSI",
+  cs: "VAŠE TIŠTĚNÁ BEZPEČNOSTNÍ ZÁLOHA",
+  hu: "AZ ÖN NYOMTATOTT BIZTONSÁGI MÁSOLATA",
+  ro: "COPIA DUMNEAVOASTRĂ DE SECURITATE IMPRIMATĂ",
+  uk: "ВАША ДРУКОВАНА КОПІЯ БЕЗПЕКИ",
+  id: "SALINAN KEAMANAN CETAK ANDA",
+  ms: "SALINAN KESELAMATAN BERCETAK ANDA",
+  tl: "ANG IYONG NAI-PRINT NA BACKUP NG SEGURIDAD",
+  hr: "VAŠA TISKANA SIGURNOSNA KOPIJA",
+  sr: "ВАША ШТАМПАНА БЕЗБЕДНОСНА КОПИЈА",
+  bg: "ВАШЕТО ОТПЕЧАТАНО КОПИЕ ЗА СИГУРНОСТ",
+  sk: "VAŠA TLAČENÁ BEZPEČNOSTNÁ ZÁLOHA",
+  ca: "LA VOSTRA CÒPIA DE SEGURETAT IMPRESA",
+};
+
+function getPrintedBackupPhrase(countryName: string, dynamicLabel?: string): string {
+  if (
+    dynamicLabel &&
+    dynamicLabel.trim() &&
+    dynamicLabel !== "Security Identification Backup"
+  ) {
+    return dynamicLabel.toUpperCase();
+  }
+  const lang = detectLanguageFromCountry(countryName || "").toLowerCase();
+  return (
+    PRINTED_BACKUP_PHRASES[lang] ||
+    PRINTED_BACKUP_PHRASES["en"] ||
+    "YOUR PRINTED SECURITY BACKUP"
+  );
+}
+
 export default function App() {
   const [country, setCountry] = useState("");
   const [identifiedLanguage, setIdentifiedLanguage] = useState<string | null>(
@@ -444,6 +568,138 @@ export default function App() {
       setDownloading(false);
     }
   };
+
+  const renderPassportBack = () => (
+    <div
+      style={{
+        width: "472px",
+        height: "665px",
+        display: "flex",
+        flexDirection: "column",
+        backgroundColor: "#FFFFFF",
+        overflow: "hidden",
+        position: "relative",
+        boxShadow:
+          "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+        border: "1px solid #d4d4d8",
+      }}
+    >
+      {/* 1. Metade Superior (50% topo): Preenchida totalmente com fundo sólido Azul Marinho Profundo (#031C3A) */}
+      <div
+        style={{
+          width: "100%",
+          height: "332.5px",
+          backgroundColor: "#031C3A",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Bloco da capa rotacionado de 90° para a esquerda (-90deg / sentido anti-horário) */}
+        <div
+          style={{
+            width: "332.5px",
+            height: "472px",
+            flexShrink: 0,
+            transform: "rotate(-90deg)",
+            transformOrigin: "center center",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            paddingTop: "68px",
+            boxSizing: "border-box",
+          }}
+        >
+          {/* 1. Logotipo "PotchX" */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              lineHeight: 1,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: '"Montserrat", "Inter", -apple-system, sans-serif',
+                fontWeight: 900,
+                fontSize: "42px",
+                color: "#FFFFFF",
+                letterSpacing: "-0.03em",
+                display: "inline-block",
+              }}
+            >
+              Potch
+            </span>
+            <PotchXLetterXBifold size={50} />
+          </div>
+
+          {/* 2. Ícone de Escudo Abaixo do Nome */}
+          <div
+            style={{
+              marginTop: "24px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <PotchXBifoldShield width={100} height={115} />
+          </div>
+
+          {/* 3. Frase de Identificação Abaixo do Escudo */}
+          <div
+            style={{
+              marginTop: "18px",
+              paddingLeft: "12px",
+              paddingRight: "12px",
+              textAlign: "center",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: '"Montserrat", "Inter", -apple-system, sans-serif',
+                fontWeight: 700,
+                fontSize: "11px",
+                color: "#FFFFFF",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                display: "block",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {getPrintedBackupPhrase(
+                formData.destinationCountry,
+                previewTranslations?.securityBackupLabel,
+              )}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Linha divisória central (alinhada à linha de dobra da Página 1) */}
+      <div
+        style={{
+          width: "100%",
+          height: "0px",
+          borderTop: "1px dashed #e2e8f0",
+          position: "relative",
+        }}
+      />
+
+      {/* 2. Metade Inferior (50% de baixo): Totalmente limpa em Branco Puro (#FFFFFF) */}
+      <div
+        style={{
+          width: "100%",
+          height: "332.5px",
+          backgroundColor: "#FFFFFF",
+          position: "relative",
+        }}
+      />
+    </div>
+  );
 
   return (
     <div className="min-h-screen relative font-sans selection:bg-indigo-100 overflow-x-hidden">
@@ -1103,68 +1359,12 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* VERSO ESTÁTICO PARA O PDF (copiado do Código 2) */}
+                  {/* VERSO ESTÁTICO PARA O PDF — CAPA EXTERNA DO PASSAPORTE */}
                   <div
                     ref={backRef}
-                    className="bg-white text-black flex flex-col overflow-hidden"
-                    style={{
-                      width: "472px",
-                      height: "665px",
-                      display: "block",
-                    }}
+                    style={{ display: "block" }}
                   >
-                    <div
-                      className="bg-white shadow-2xl overflow-hidden relative flex flex-col border border-zinc-300"
-                      style={{
-                        width: "100%",
-                        maxWidth: "472px",
-                        minHeight: "665px",
-                        backgroundColor: "white",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        display: "flex",
-                      }}
-                    >
-                      {(() => {
-                        return null;
-                      })()}
-                      <div
-                        style={{
-                          transform: "rotate(-90deg)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <h1
-                          style={{
-                            fontFamily:
-                              "'Nunito', 'Arial Rounded MT Bold', 'Gotham Rounded', 'Poppins', sans-serif",
-                            fontSize: "150px",
-                            fontWeight: 800,
-                            letterSpacing: "8px",
-                            margin: 0,
-                            whiteSpace: "nowrap",
-                            background: (() => {
-                              const colors = getCountryColors(
-                                formData.destinationCountry,
-                              );
-                              if (colors.length === 1) return colors[0];
-                              if (colors.length === 2)
-                                return `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`;
-                              if (colors.length >= 3)
-                                return `linear-gradient(135deg, ${colors[0]}, ${colors[1]}, ${colors[2]})`;
-                              return "#1a2b4b";
-                            })(),
-                            WebkitBackgroundClip: "text",
-                            backgroundClip: "text",
-                            color: "transparent",
-                          }}
-                        >
-                          PotchX
-                        </h1>
-                      </div>
-                    </div>
+                    {renderPassportBack()}
                   </div>
                 </div>
 
@@ -1465,69 +1665,13 @@ export default function App() {
                     </p>
                   </div>
 
-                  {/* VERSO VISÍVEL PARA O USUÁRIO (sem ref) */}
+                  {/* VERSO VISÍVEL — CAPA EXTERNA DO PASSAPORTE */}
                   {showVerso && (
                     <div
                       onClick={() => setShowVerso(false)}
-                      style={{
-                        cursor: "pointer",
-                        width: "100%",
-                        maxWidth: "472px",
-                        margin: "0 auto",
-                      }}
+                      style={{ cursor: "pointer", width: "100%", maxWidth: "472px", margin: "0 auto" }}
                     >
-                      <div
-                        className="bg-white shadow-2xl overflow-hidden relative flex flex-col border border-zinc-300"
-                        style={{
-                          width: "100%",
-                          maxWidth: "472px",
-                          minHeight: "665px",
-                          backgroundColor: "white",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          display: "flex",
-                        }}
-                      >
-                        {(() => {
-                          return null;
-                        })()}
-                        <div
-                          style={{
-                            transform: "rotate(-90deg)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <h1
-                            style={{
-                              fontFamily:
-                                "'Nunito', 'Arial Rounded MT Bold', 'Gotham Rounded', 'Poppins', sans-serif",
-                              fontSize: "150px",
-                              fontWeight: 800,
-                              letterSpacing: "8px",
-                              margin: 0,
-                              whiteSpace: "nowrap",
-                              background: (() => {
-                                const colors = getCountryColors(
-                                  formData.destinationCountry,
-                                );
-                                if (colors.length === 1) return colors[0];
-                                if (colors.length === 2)
-                                  return `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`;
-                                if (colors.length >= 3)
-                                  return `linear-gradient(135deg, ${colors[0]}, ${colors[1]}, ${colors[2]})`;
-                                return "#1a2b4b";
-                              })(),
-                              WebkitBackgroundClip: "text",
-                              backgroundClip: "text",
-                              color: "transparent",
-                            }}
-                          >
-                            PotchX
-                          </h1>
-                        </div>
-                      </div>
+                      {renderPassportBack()}
                       <p className="text-center text-base font-bold text-amber-400 mt-3 hover:text-amber-300 transition-colors cursor-pointer">
                         🔄{" "}
                         {previewTranslations?.clickToBack ||
