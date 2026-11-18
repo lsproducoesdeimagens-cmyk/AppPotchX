@@ -67,7 +67,7 @@ export const PRELOADED_TRANSLATIONS: Record<string, TranslatedForm> = {
   portuguese: {
     title: "PotchX",
     subtitle:
-      "Preencha seus dados para gerar uma PotchX para viagem. Imprima e leve sempre com você.",
+      "Preencha seus dados para gerar um PotchX para viagem. Imprima e leve sempre com você.",
     personalData: "Dados Pessoais",
     fullName: "Nome Completo",
     bloodType: "Tipo Sanguíneo",
@@ -96,18 +96,18 @@ export const PRELOADED_TRANSLATIONS: Record<string, TranslatedForm> = {
     placeholderHotelPhone: "Telefone do hotel",
     placeholderEmergencyName: "Nome do contato de emergência",
     placeholderEmergencyPhone: "Telefone do contato",
-    successTitle: "PotchX Salva!",
-    successMessage: "Sua **PotchX** foi salva com sucesso no seu dispositivo.",
+    successTitle: "PotchX Salvo!",
+    successMessage: "Seu **PotchX** foi salvo com sucesso no seu dispositivo.",
     downloadAgain: "Baixar PDF Novamente",
     close: "Fechar",
     presentationTitle: "PotchX para Viagem",
     presentationSubtitle: "(Backup de Segurança)",
     presentationDescription:
-      "A PotchX para Viagem é uma ferramenta de identificação digital projetada para lhe dar tranquilidade enquanto explora. Ela permite que você mantenha seus documentos originais seguros, garantindo que você tenha todas as suas informações essenciais à mão.",
+      "O PotchX para Viagem é uma ferramenta de identificação digital projetada para lhe dar tranquilidade enquanto explora. Ele permite que você mantenha seus documentos originais seguros, garantindo que você tenha todas as suas informações essenciais à mão.",
     whyUseIt: "Por que usar?",
     keepOriginalsTitle: "Mantenha os Originais Seguros",
     keepOriginalsDesc:
-      "Deixe seu Passaporte ou RG original no cofre do hotel. Use esta PotchX para atividades diárias, idas à praia e vida noturna.",
+      "Deixe seu Passaporte ou RG original no cofre do hotel. Use este PotchX para atividades diárias, idas à praia e vida noturna.",
     emergencyReadyTitle: "Pronto para Emergências",
     emergencyReadyDesc:
       "Centraliza seu tipo sanguíneo, alergias e informações de contato do hotel local — traduzidos para o idioma local do país que você está visitando.",
@@ -116,7 +116,7 @@ export const PRELOADED_TRANSLATIONS: Record<string, TranslatedForm> = {
       "Para sua segurança, nenhum dado é armazenado no aplicativo. Suas informações e fotos são salvas apenas na galeria do seu telefone e são excluídas permanentemente do sistema do aplicativo após cada download.",
     notLegalSubstituteTitle: "Importante: Não é um Substituto Legal",
     notLegalSubstituteDesc:
-      "Esta PotchX é apenas para assistência informativa e de identificação. Ela não substitui seus documentos oficiais originais em situações formais.",
+      "Este PotchX é apenas para assistência informativa e de identificação. Ele não substitui seus documentos oficiais originais em situações formais.",
     mustCarryTitle: "Você DEVE portar seu Passaporte ou RG original para:",
     immigrationBorders: "Imigração e Fronteiras",
     flightsHotelCheckin: "Voos e Check-in em Hotéis",
@@ -245,11 +245,11 @@ export const PRELOADED_TRANSLATIONS: Record<string, TranslatedForm> = {
     presentationTitle: "PotchX",
     presentationSubtitle: "(Respaldo de Seguridad)",
     presentationDescription:
-      "La PotchX es una herramienta de identificación digital diseñada para brindarle tranquilidad mientras explora. Le permite mantener seguros sus documentos originales y, al mismo tiempo, garantiza que tenga a mano toda su información esencial.",
+      "El PotchX es una herramienta de identificación digital diseñada para brindarle tranquilidad mientras explora. Le permite mantener seguros sus documentos originales y, al mismo tiempo, garantiza que tenga a mano toda su información esencial.",
     whyUseIt: "¿Por qué usarlo?",
     keepOriginalsTitle: "Mantenga seguros os originales",
     keepOriginalsDesc:
-      "Deje su pasaporte o identificación oficial en la caja fuerte del hotel. Use esta PotchX para actividades diarias, viajes a la playa y vida nocturna.",
+      "Deje su pasaporte o identificación oficial en la caja fuerte del hotel. Use este PotchX para actividades diarias, viajes a la playa y vida nocturna.",
     emergencyReadyTitle: "Listo para emergencias",
     emergencyReadyDesc:
       "Centraliza su tipo de sangre, alérgenos e información de contacto del hotel local, traducida al idioma local del país que está visitando.",
@@ -258,7 +258,7 @@ export const PRELOADED_TRANSLATIONS: Record<string, TranslatedForm> = {
       "Para su segurança, no se almacenan datos en la aplicación. Su información y fotos se guardan solo en la galería de su teléfono y se eliminan permanentemente del sistema de la aplicación después de cada descarga.",
     notLegalSubstituteTitle: "Importante: No es un sustituto legal",
     notLegalSubstituteDesc:
-      "Esta PotchX es solo para asistencia informativa e identificación. No reemplaza sus documentos oficiales originales en situaciones formales.",
+      "Este PotchX es solo para asistencia informativa e identificación. No reemplaza sus documentos oficiales originales en situaciones formales.",
     mustCarryTitle: "DEBE llevar su pasaporte o identificación original para:",
     immigrationBorders: "Inmigración y fronteras",
     flightsHotelCheckin: "Vuelos y check-in en hoteles",
@@ -298,7 +298,7 @@ export const PRELOADED_TRANSLATIONS: Record<string, TranslatedForm> = {
     destinationCountry: "Pays de Destination",
     passportPhoto: "Photo du Passeport",
     uploadText: "Cliquez pour télécharger la photo du passeport",
-    viewDoc: "Voir la PotchX",
+    viewDoc: "Voir le PotchX",
     downloadPdf: "Télécharger le PDF",
     select: "Sélectionner",
     placeholderMedications: "Vos médicaments ou 'Non'",
@@ -308,19 +308,19 @@ export const PRELOADED_TRANSLATIONS: Record<string, TranslatedForm> = {
     placeholderHotelPhone: "Téléphone de l'hôtel",
     placeholderEmergencyName: "Nom du contact d'urgence",
     placeholderEmergencyPhone: "Téléphone du contact",
-    successTitle: "PotchX Enregistrée !",
+    successTitle: "PotchX Enregistré !",
     successMessage:
-      "Votre **PotchX** a été enregistrée avec succès sur votre appareil.",
+      "Votre **PotchX** a été enregistré avec succès sur votre appareil.",
     downloadAgain: "Télécharger à nouveau le PDF",
     close: "Fermer",
     presentationTitle: "PotchX",
     presentationSubtitle: "(Sauvegarde de Sécurité)",
     presentationDescription:
-      "La PotchX est un outil d'identification numérique conçu pour vous offrir une tranquillité d'esprit pendant vos explorations. Elle vous permet de garder vos documents originaux en sécurité tout en vous assurant d'avoir toutes vos informations essentielles à portée de main.",
+      "Le PotchX est un outil d'identification numérique conçu pour vous offrir une tranquillité d'esprit pendant vos explorations. Elle vous permet de garder vos documents originaux en sécurité tout en vous assurant d'avoir toutes vos informations essentielles à portée de main.",
     whyUseIt: "Pourquoi l'utiliser ?",
     keepOriginalsTitle: "Gardez les originaux en sécurité",
     keepOriginalsDesc:
-      "Laissez votre passeport ou votre carte d'identité officielle dans le coffre-fort de l'hôtel. Utilisez cette PotchX pour vos activités quotidiennes, vos sorties à la plage et votre vie nocturne.",
+      "Laissez votre passeport ou votre carte d'identité officielle dans le coffre-fort de l'hôtel. Utilisez ce PotchX pour vos activités quotidiennes, vos sorties à la plage et votre vie nocturne.",
     emergencyReadyTitle: "Prêt pour les urgences",
     emergencyReadyDesc:
       "Il centralise votre groupe sanguin, vos allergies et les coordonnées de votre hôtel local, traduits dans la langue locale du pays que vous visitez.",
@@ -329,7 +329,7 @@ export const PRELOADED_TRANSLATIONS: Record<string, TranslatedForm> = {
       "Pour votre sécurité, aucune donnée n'est stockée dans l'application. Vos informations et photos sont enregistrées uniquement dans la galerie de votre téléphone et sont définitivement supprimées du système de l'application après chaque téléchargement.",
     notLegalSubstituteTitle: "Important : Ne remplace pas un document légal",
     notLegalSubstituteDesc:
-      "Cette PotchX est uniquement destinée à l'information et à l'aide à l'identification. Elle ne remplace pas vos documents officiels originaux dans les situations formelles.",
+      "Ce PotchX est uniquement destiné à l'information et à l'aide à l'identification. Il ne remplace pas vos documents officiels originaux dans les situations formelles.",
     mustCarryTitle:
       "Vous DEVEZ avoir sur vous votre passeport ou votre carte d'identité originale pour :",
     immigrationBorders: "Immigration et frontières",
@@ -380,19 +380,19 @@ export const PRELOADED_TRANSLATIONS: Record<string, TranslatedForm> = {
     placeholderHotelPhone: "Telefono dell'hotel",
     placeholderEmergencyName: "Nome del contatto di emergenza",
     placeholderEmergencyPhone: "Telefono del contatto",
-    successTitle: "PotchX Salvata!",
+    successTitle: "PotchX Salvato!",
     successMessage:
-      "La tua **PotchX** è stata salvata con successo sul tuo dispositivo.",
+      "Il tuo **PotchX** è stato salvato con successo sul tuo dispositivo.",
     downloadAgain: "Scarica di nuovo il PDF",
     close: "Chiudi",
     presentationTitle: "PotchX",
     presentationSubtitle: "(Backup di Sicurezza)",
     presentationDescription:
-      "La PotchX è uno strumento di identificazione digitale progettato per darti tranquillità durante l'esplorazione. Ti consente di mantenere al sicuro i tuoi documenti originali assicurandoti di avere a portata di mano tutte le tue informazioni essenziali.",
+      "Il PotchX è uno strumento di identificazione digitale progettato per darti tranquillità durante l'esplorazione. Ti consente di mantenere al sicuro i tuoi documenti originali assicurandoti di avere a portata di mano tutte le tue informazioni essenziali.",
     whyUseIt: "Perché usarlo?",
     keepOriginalsTitle: "Mantieni gli originali al sicuro",
     keepOriginalsDesc:
-      "Lascia il tuo passaporto o documento d'identità ufficiale nella cassaforte dell'hotel. Usa questa PotchX per le attività quotidiane, le gite in spiaggia e la vita notturna.",
+      "Lascia il tuo passaporto o documento d'identità ufficiale nella cassaforte dell'hotel. Usa questo PotchX per le attività quotidiane, le gite in spiaggia e la vita notturna.",
     emergencyReadyTitle: "Pronto per le emergenze",
     emergencyReadyDesc:
       "Centralizza il tuo gruppo sanguigno, le tue allergie e le informazioni di contatto dell'hotel locale, tradotte nella lingua locale del paese che stai visitando.",
@@ -401,7 +401,7 @@ export const PRELOADED_TRANSLATIONS: Record<string, TranslatedForm> = {
       "Per la tua sicurezza, nessun dato viene memorizzato nell'app. Le tue informazioni e le tue foto vengono salvate solo nella galleria del tuo telefono e vengono eliminate definitivamente dal sistema dell'app dopo ogni download.",
     notLegalSubstituteTitle: "Importante: non è un sostituto legale",
     notLegalSubstituteDesc:
-      "Questa PotchX è solo a scopo informativo e di assistenza all'identificazione. Non sostituisce i documenti ufficiali originali in situazioni formali.",
+      "Questo PotchX è solo a scopo informativo e di assistenza all'identificazione. Non sostituisce i documenti ufficiali originali in situazioni formali.",
     mustCarryTitle:
       "DEVI portare con te il passaporto o il documento d'identità originale per:",
     immigrationBorders: "Immigrazione e frontiere",
